@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TechFest 2026 — Where Innovation Meets Imagination</title>
+  <meta name="description" content="Welcome to TechFest 2026, the premier collegiate technical festival. Experience the future of technology with cinematic WebGL scenes, interactive bento grids, and immersive 3D timelines.">
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Fonts -->
+  <!-- Clash Display from Fontshare -->
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap" rel="stylesheet">
+  <!-- Space Grotesk, Inter, and JetBrains Mono from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Libraries: Three.js and Add-ons -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- OrbitControls (used for debugging/drag visual feedback) -->
+  <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <!-- Postprocessing for Hero UnrealBloomPass -->
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+  <!-- Libraries: GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  
+  <!-- Libraries: Lenis Smooth Scroll -->
+  <script src="https://unpkg.com/lenis@1.1.5/dist/lenis.min.js"></script>
+</head>
+<body>
+
+  <!-- Loading Screen — Cinematic Opening -->
+  <div id="loader" class="loader-screen">
+    <div class="loader-bg-ambient"></div>
+    <div class="loader-content">
+      <div id="loader-canvas-container" class="loader-canvas-container"></div>
+      <h1 class="loader-title">TECHFEST</h1>
+      <span class="loader-subtitle">2026</span>
+      <div class="loader-progress-container">
+        <span id="loader-percentage" class="loader-percentage">0%</span>
+        <div class="loader-progress-bar-wrap">
+          <div id="loader-progress-bar" class="loader-progress-bar"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scroll Progress Indicator -->
+  <div class="scroll-progress-indicator">
+    <div id="scroll-progress-fill" class="scroll-progress-fill"></div>
+  </div>
+
+  <!-- Custom Cursor -->
+  <div id="custom-cursor" class="custom-cursor">
+    <div id="cursor-dot" class="cursor-dot"></div>
+    <div id="cursor-ring" class="cursor-ring"></div>
+    <span id="cursor-label" class="cursor-label">DRAG</span>
+  </div>
+
+  <!-- Navigation Bar -->
+  <nav id="navbar" class="navbar">
+    <div class="nav-container">
+      <a href="#home" class="nav-logo hover-target">TECHFEST 2026</a>
+      <div class="nav-links">
+        <a href="#home" class="nav-link active hover-target" data-section="home">Home</a>
+        <a href="#about" class="nav-link hover-target" data-section="about">About</a>
+        <a href="#events" class="nav-link hover-target" data-section="events">Events</a>
+        <a href="#timeline" class="nav-link hover-target" data-section="timeline">Timeline</a>
+        <a href="#workshops" class="nav-link hover-target" data-section="workshops">Workshops</a>
+        <a href="#sponsors" class="nav-link hover-target" data-section="sponsors">Sponsors</a>
+        <a href="#team" class="nav-link hover-target" data-section="team">Team</a>
+      </div>
+      <div class="nav-actions">
+        <button id="nav-register-btn" class="nav-register-btn hover-target">Register Now</button>
+        <button id="mobile-menu-toggle" class="mobile-menu-toggle">
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Navigation Menu -->
+  <div id="mobile-menu" class="mobile-menu">
+    <div class="mobile-menu-links">
+      <a href="#home" class="mobile-nav-link" data-section="home">Home</a>
+      <a href="#about" class="mobile-nav-link" data-section="about">About</a>
+      <a href="#events" class="mobile-nav-link" data-section="events">Events</a>
+      <a href="#timeline" class="mobile-nav-link" data-section="timeline">Timeline</a>
+      <a href="#workshops" class="mobile-nav-link" data-section="workshops">Workshops</a>
+      <a href="#sponsors" class="mobile-nav-link" data-section="sponsors">Sponsors</a>
+      <a href="#team" class="mobile-nav-link" data-section="team">Team</a>
+      <button id="mobile-register-btn" class="mobile-register-btn">Register Now</button>
+    </div>
+  </div>
+
+  <!-- Page Wrapper (for Lenis) -->
+  <div class="page-wrapper">
+
+    <!-- Hero Section -->
+    <section id="home" class="hero-section">
+      <div id="hero-canvas-container" class="webgl-container"></div>
+      <div class="hero-content container">
+        <span class="hero-tag reveal-text">— IIT / NIT TECHFEST 2026 —</span>
+        <h1 class="hero-title reveal-text">
+          <span class="char-wrap">TECHFEST</span>
+          <span class="char-wrap">2026</span>
+        </h1>
+        <p class="hero-subtitle reveal-text">Where Innovation Meets Imagination</p>
+        <div class="hero-actions reveal-text">
+          <a href="#events" class="btn btn-primary hover-target magnetic">Explore Events</a>
+          <button class="btn btn-secondary hover-target magnetic trigger-modal">Register Now</button>
+        </div>
+      </div>
+      <div id="scroll-indicator" class="scroll-indicator">
+        <div class="scroll-indicator-line"></div>
+        <span class="scroll-indicator-text">SCROLL</span>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+      <div id="about-canvas-container" class="about-canvas-container"></div>
+      <div class="container grid-2">
+        <div class="about-left-col">
+          <span class="section-label reveal-text">— ABOUT —</span>
+          <h2 class="section-title reveal-text">Building Tomorrow's Innovators</h2>
+        </div>
+        <div class="about-right-col">
+          <p class="about-body reveal-text">
+            TechFest 2026 is India's premier national collegiate technical festival, serving as a beacon for the brightest young minds. Over three days, we challenge, inspire, and create the technologies that will define our shared tomorrow.
+          </p>
+          <p class="about-body reveal-text">
+            Step into an ecosystem of peerless innovation, where abstract code transforms into physical creation and bold concepts evolve into disruptive startups.
+          </p>
+          
+          <!-- Animated Statistics Row -->
+          <div class="stats-row">
+            <div class="stat-card glass-panel reveal-stagger">
+              <span class="stat-number" data-target="5000">0</span><span class="stat-plus">+</span>
+              <span class="stat-label">Participants</span>
+            </div>
+            <div class="stat-card glass-panel reveal-stagger">
+              <span class="stat-number" data-target="40">0</span><span class="stat-plus">+</span>
+              <span class="stat-label">Events</span>
+            </div>
+            <div class="stat-card glass-panel reveal-stagger">
+              <span class="stat-number" data-target="20">0</span><span class="stat-plus">+</span>
+              <span class="stat-label">Workshops</span>
+            </div>
+            <div class="stat-card glass-panel reveal-stagger">
+              <span class="stat-number" data-target="50">0</span><span class="stat-label">L+</span>
+              <span class="stat-label">Prize Pool</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Events Section -->
+    <section id="events" class="events-section">
+      <div class="container">
+        <span class="section-label reveal-text">— EVENTS —</span>
+        <h2 class="section-title reveal-text">What Awaits You</h2>
+        
+        <!-- Bento Grid Layout -->
+        <div class="events-bento-grid">
+          <!-- Card 1: Hackathon (Large Wide) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="0">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-0"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">01 / GENESIS</span>
+              <h3 class="event-title">Hackathon</h3>
+              <p class="event-desc">36 hours of non-stop coding. Build next-generation software solutions for real-world problems under intense pressure.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">36 Hours</span>
+                <span class="event-tag-pill">Team of 2-4</span>
+                <span class="event-tag-pill">₹1,50,000 Prize</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+          <!-- Card 2: Robotics Challenge (Tall) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="1">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-1"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">02 / MECHATRONICS</span>
+              <h3 class="event-title">Robotics Challenge</h3>
+              <p class="event-desc">Design, construct, and command autonomous robots to navigate complex arenas and complete time-critical objectives.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">Autonomous</span>
+                <span class="event-tag-pill">Team of 2-5</span>
+                <span class="event-tag-pill">₹1,20,000 Prize</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+          <!-- Card 3: AI/ML Showdown (Normal) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="2">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-2"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">03 / COGNITION</span>
+              <h3 class="event-title">AI/ML Showdown</h3>
+              <p class="event-desc">Train models to optimize precision, speed, and intelligence in predictive and generative intelligence battles.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">Predictive AI</span>
+                <span class="event-tag-pill">Individual</span>
+                <span class="event-tag-pill">₹80,000 Prize</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+          <!-- Card 4: Cybersecurity CTF (Normal) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="3">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-3"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">04 / SECURE</span>
+              <h3 class="event-title">Cybersecurity CTF</h3>
+              <p class="event-desc">Jeopardy-style capture the flag competition. Expose vulnerabilities, crack encryptions, and bypass defenses.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">CTF Format</span>
+                <span class="event-tag-pill">Team of 1-3</span>
+                <span class="event-tag-pill">₹1,00,000 Prize</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+          <!-- Card 5: Gaming Tournament (Tall) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="4">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-4"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">05 / ECLIPSE</span>
+              <h3 class="event-title">Gaming Tournament</h3>
+              <p class="event-desc">The ultimate arena for competitive e-sports. Compete against the best teams in tactical, high-FPS battles.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">E-Sports</span>
+                <span class="event-tag-pill">Team of 5</span>
+                <span class="event-tag-pill">₹75,000 Prize</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+          <!-- Card 6: Startup Pitch (Large Wide) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="5">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-5"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">06 / VENTURE</span>
+              <h3 class="event-title">Startup Pitch</h3>
+              <p class="event-desc">Pitch your groundbreaking business concept to top-tier venture capitalists, angel investors, and tech leaders.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">Pitch Desk</span>
+                <span class="event-tag-pill">Team of 1-4</span>
+                <span class="event-tag-pill">₹2,00,000 Equity</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+          <!-- Card 7: Drone Racing (Normal) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="6">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-6"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">07 / VELOCITY</span>
+              <h3 class="event-title">Drone Racing</h3>
+              <p class="event-desc">High-speed drone maneuverability challenge. Navigate obstacle courses with maximum agility and speed.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">FPV Racing</span>
+                <span class="event-tag-pill">Individual</span>
+                <span class="event-tag-pill">₹90,000 Prize</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+          <!-- Card 8: Web Development (Normal) -->
+          <div class="event-card glass-panel tilt-card reveal-stagger" data-event-index="7">
+            <div class="event-webgl-wrapper">
+              <canvas class="event-canvas" id="canvas-event-7"></canvas>
+            </div>
+            <div class="event-card-content">
+              <span class="event-num">08 / INTERACTIVE</span>
+              <h3 class="event-title">Web Development</h3>
+              <p class="event-desc">Construct immersive, dynamic, and visually stunning web interfaces following modern UI/UX design paradigms.</p>
+              <div class="event-tags">
+                <span class="event-tag-pill">Front-End</span>
+                <span class="event-tag-pill">Team of 1-2</span>
+                <span class="event-tag-pill">₹60,000 Prize</span>
+              </div>
+              <span class="event-hover-action">View Details →</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Timeline Section -->
+    <section id="timeline" class="timeline-section">
+      <div class="timeline-canvas-wrapper">
+        <canvas id="timeline-canvas"></canvas>
+      </div>
+      <div class="timeline-pinned-content">
+        <div class="container timeline-header">
+          <span class="section-label">— TIMELINE —</span>
+          <h2 class="section-title">The Journey</h2>
+        </div>
+        
+        <!-- Virtual Tunnel Milestone overlays -->
+        <div class="timeline-milestones-container">
+          
+          <!-- Day 1 Milestones -->
+          <div class="milestone-card glass-panel" data-milestone-index="0" data-z-pos="0">
+            <span class="milestone-time">DAY 01 - 09:00 AM</span>
+            <h3 class="milestone-title">Opening Ceremony</h3>
+            <p class="milestone-text">Keynote address by industry pioneers and initial lighting ceremony of TechFest 2026.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="1" data-z-pos="1">
+            <span class="milestone-time">DAY 01 - 11:30 AM</span>
+            <h3 class="milestone-title">Registration Desk Open</h3>
+            <p class="milestone-text">On-site credential distribution and kit pickup at the main lobby.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="2" data-z-pos="2">
+            <span class="milestone-time">DAY 01 - 02:00 PM</span>
+            <h3 class="milestone-title">Inaugural Keynote</h3>
+            <p class="milestone-text">A cinematic overview on the Future of Autonomous Systems and AI ethics.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="3" data-z-pos="3">
+            <span class="milestone-time">DAY 01 - 04:30 PM</span>
+            <h3 class="milestone-title">Workshop Series Begin</h3>
+            <p class="milestone-text">Hands-on bootcamps kicking off in designated labs across the campus.</p>
+          </div>
+
+          <!-- Day 2 Milestones -->
+          <div class="milestone-card glass-panel" data-milestone-index="4" data-z-pos="4">
+            <span class="milestone-time">DAY 02 - 09:00 AM</span>
+            <h3 class="milestone-title">Technical Events Begin</h3>
+            <p class="milestone-text">First stage qualification rounds for robotics and gaming championships.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="5" data-z-pos="5">
+            <span class="milestone-time">DAY 02 - 01:00 PM</span>
+            <h3 class="milestone-title">Hackathon Mid-Check</h3>
+            <p class="milestone-text">Initial mentor evaluations and progress audits for all participating teams.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="6" data-z-pos="6">
+            <span class="milestone-time">DAY 02 - 03:00 PM</span>
+            <h3 class="milestone-title">AI/ML Challenge</h3>
+            <p class="milestone-text">Model evaluation and testing phase on unseen test datasets.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="7" data-z-pos="7">
+            <span class="milestone-time">DAY 02 - 06:00 PM</span>
+            <h3 class="milestone-title">Drone Racing Finals</h3>
+            <p class="milestone-text">Night racing finals under illuminated wireframe obstacles.</p>
+          </div>
+
+          <!-- Day 3 Milestones -->
+          <div class="milestone-card glass-panel" data-milestone-index="8" data-z-pos="8">
+            <span class="milestone-time">DAY 03 - 10:00 AM</span>
+            <h3 class="milestone-title">Startup Pitch Finals</h3>
+            <p class="milestone-text">Shortlisted startups pitch live to the jury and venture panels.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="9" data-z-pos="9">
+            <span class="milestone-time">DAY 03 - 01:00 PM</span>
+            <h3 class="milestone-title">Gaming Tournament Finals</h3>
+            <p class="milestone-text">E-sports championship main stage clash with live screen casting.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="10" data-z-pos="10">
+            <span class="milestone-time">DAY 03 - 04:00 PM</span>
+            <h3 class="milestone-title">Closing Ceremony</h3>
+            <p class="milestone-text">Closing statements, valedictory speeches, and cultural showcase.</p>
+          </div>
+
+          <div class="milestone-card glass-panel" data-milestone-index="11" data-z-pos="11">
+            <span class="milestone-time">DAY 03 - 06:30 PM</span>
+            <h3 class="milestone-title">Prize Distribution</h3>
+            <p class="milestone-text">Celebrating the victors. Over 50 Lakhs in prizes awarded to winners.</p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Workshops Section -->
+    <section id="workshops" class="workshops-section">
+      <div class="workshops-pinned-wrap">
+        <div class="container workshops-header">
+          <span class="section-label">— WORKSHOPS —</span>
+          <h2 class="section-title">Learn. Build. Create.</h2>
+        </div>
+        
+        <!-- Horizontal Scroll Container -->
+        <div class="workshops-horizontal-container">
+          <div class="workshops-cards-row">
+            <!-- Card 1 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">01</div>
+              <h3 class="workshop-title">Quantum Computing Basics</h3>
+              <p class="workshop-speaker">Dr. Aris Thorne — IBM Quantum Lab</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">2 Days</span>
+                <span class="workshop-tag-pill">Intermediate</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 12 / 60</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 80%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">02</div>
+              <h3 class="workshop-title">Neuromorphic Systems</h3>
+              <p class="workshop-speaker">Elena Rostova — Neural Dynamics</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">1 Day</span>
+                <span class="workshop-tag-pill">Advanced</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 5 / 45</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 88.8%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">03</div>
+              <h3 class="workshop-title">Autonomous UAV Control</h3>
+              <p class="workshop-speaker">Marcus Vane — Skydio Robotics</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">2 Days</span>
+                <span class="workshop-tag-pill">Beginner</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 24 / 50</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 52%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">04</div>
+              <h3 class="workshop-title">Generative AI Pipelines</h3>
+              <p class="workshop-speaker">Siddharth Sen — OpenAI Partner</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">1 Day</span>
+                <span class="workshop-tag-pill">Intermediate</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 2 / 80</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 97.5%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">05</div>
+              <h3 class="workshop-title">Smart Contract Auditing</h3>
+              <p class="workshop-speaker">Tariq Jamil — ConsenSys</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">2 Days</span>
+                <span class="workshop-tag-pill">Advanced</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 15 / 40</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 62.5%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">06</div>
+              <h3 class="workshop-title">Embedded Rust Systems</h3>
+              <p class="workshop-speaker">Oliver Cole — Rust Embedded WG</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">1 Day</span>
+                <span class="workshop-tag-pill">Advanced</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 8 / 30</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 73.3%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 7 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">07</div>
+              <h3 class="workshop-title">Humanoid Inverse Kinematics</h3>
+              <p class="workshop-speaker">Dr. Kenji Sato — Honda Robotics</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">2 Days</span>
+                <span class="workshop-tag-pill">Advanced</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 3 / 25</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 88%;"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card 8 -->
+            <div class="workshop-card glass-panel tilt-card">
+              <div class="workshop-number">08</div>
+              <h3 class="workshop-title">Edge AI and IoT Networks</h3>
+              <p class="workshop-speaker">Clara Oswald — ARM Holdings</p>
+              <div class="workshop-tags">
+                <span class="workshop-tag-pill">1 Day</span>
+                <span class="workshop-tag-pill">Intermediate</span>
+              </div>
+              <div class="workshop-seats-info">
+                <span>Seats remaining: 18 / 50</span>
+                <div class="workshop-progress-track">
+                  <div class="workshop-progress-fill" style="width: 64%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sponsors Section -->
+    <section id="sponsors" class="sponsors-section">
+      <div class="container">
+        <span class="section-label reveal-text">— SPONSORS —</span>
+        <h2 class="section-title reveal-text">Powered By</h2>
+        
+        <div class="sponsors-marquee-container">
+          <!-- Tier 1: Platinum Partners -->
+          <div class="sponsor-tier-label reveal-text">PLATINUM PARTNERS</div>
+          <div class="marquee-track marquee-left">
+            <div class="marquee-content">
+              <!-- Logos repeated twice to allow infinite scroll -->
+              <div class="sponsor-logo hover-target"><span>APPLE</span></div>
+              <div class="sponsor-logo hover-target"><span>SPACEX</span></div>
+              <div class="sponsor-logo hover-target"><span>TESLA</span></div>
+              <div class="sponsor-logo hover-target"><span>STRIPE</span></div>
+              <div class="sponsor-logo hover-target"><span>LINEAR</span></div>
+              <div class="sponsor-logo hover-target"><span>NOTHING</span></div>
+              <!-- Repeat for seamless scrolling -->
+              <div class="sponsor-logo hover-target"><span>APPLE</span></div>
+              <div class="sponsor-logo hover-target"><span>SPACEX</span></div>
+              <div class="sponsor-logo hover-target"><span>TESLA</span></div>
+              <div class="sponsor-logo hover-target"><span>STRIPE</span></div>
+              <div class="sponsor-logo hover-target"><span>LINEAR</span></div>
+              <div class="sponsor-logo hover-target"><span>NOTHING</span></div>
+            </div>
+          </div>
+
+          <div class="marquee-divider"></div>
+
+          <!-- Tier 2: Gold Partners -->
+          <div class="sponsor-tier-label reveal-text">GOLD PARTNERS</div>
+          <div class="marquee-track marquee-right">
+            <div class="marquee-content">
+              <div class="sponsor-logo hover-target"><span>GOOGLE</span></div>
+              <div class="sponsor-logo hover-target"><span>NVIDIA</span></div>
+              <div class="sponsor-logo hover-target"><span>OPENAI</span></div>
+              <div class="sponsor-logo hover-target"><span>GITHUB</span></div>
+              <div class="sponsor-logo hover-target"><span>INTEL</span></div>
+              <div class="sponsor-logo hover-target"><span>AMD</span></div>
+              <!-- Repeat for seamless scrolling -->
+              <div class="sponsor-logo hover-target"><span>GOOGLE</span></div>
+              <div class="sponsor-logo hover-target"><span>NVIDIA</span></div>
+              <div class="sponsor-logo hover-target"><span>OPENAI</span></div>
+              <div class="sponsor-logo hover-target"><span>GITHUB</span></div>
+              <div class="sponsor-logo hover-target"><span>INTEL</span></div>
+              <div class="sponsor-logo hover-target"><span>AMD</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="team-section">
+      <div class="container">
+        <span class="section-label reveal-text">— TEAM —</span>
+        <h2 class="section-title reveal-text">The Minds Behind It</h2>
+        
+        <div class="team-grid">
+          <!-- Team Member 1 -->
+          <div class="team-card glass-panel tilt-card reveal-stagger">
+            <div class="team-image-area">
+              <div class="team-placeholder-avatar">AC</div>
+            </div>
+            <div class="team-card-body">
+              <h3 class="team-name">Aarav Chaudhari</h3>
+              <span class="team-role">Lead Organizer & Director</span>
+              <div class="team-socials">
+                <a href="#" class="team-social-link hover-target">LN</a>
+                <a href="#" class="team-social-link hover-target">GH</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Team Member 2 -->
+          <div class="team-card glass-panel tilt-card reveal-stagger">
+            <div class="team-image-area">
+              <div class="team-placeholder-avatar">NS</div>
+            </div>
+            <div class="team-card-body">
+              <h3 class="team-name">Nisha Sharma</h3>
+              <span class="team-role">Head of WebGL & Creative Tech</span>
+              <div class="team-socials">
+                <a href="#" class="team-social-link hover-target">LN</a>
+                <a href="#" class="team-social-link hover-target">GH</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Team Member 3 -->
+          <div class="team-card glass-panel tilt-card reveal-stagger">
+            <div class="team-image-area">
+              <div class="team-placeholder-avatar">RK</div>
+            </div>
+            <div class="team-card-body">
+              <h3 class="team-name">Rohan Kapoor</h3>
+              <span class="team-role">Lead Logistics & Operations</span>
+              <div class="team-socials">
+                <a href="#" class="team-social-link hover-target">LN</a>
+                <a href="#" class="team-social-link hover-target">GH</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Registration Section -->
+    <section id="register" class="register-section">
+      <div id="register-canvas-container" class="webgl-container"></div>
+      <div class="register-content container">
+        <span class="section-label reveal-text">— JOIN THE FUTURE —</span>
+        <h2 class="register-title reveal-text">Ready to Innovate?</h2>
+        <p class="register-subtitle reveal-text">Over 5,000 participants. 40+ events. One unforgettable experience.</p>
+        <div class="register-btn-wrap reveal-text">
+          <button id="main-register-cta" class="btn btn-primary main-register-cta hover-target magnetic trigger-modal">Register Now</button>
+        </div>
+        <span class="register-note reveal-text">Registration closes: March 15, 2026</span>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer" class="footer-section">
+      <div class="footer-grid-overlay"></div>
+      <div id="footer-canvas-container" class="footer-canvas-container"></div>
+      
+      <div class="container footer-content">
+        <div class="footer-cols">
+          <!-- Col 1 -->
+          <div class="footer-col footer-col-info">
+            <h3 class="footer-logo">TECHFEST 2026</h3>
+            <p class="footer-tagline">Designing the next generation of technical ingenuity and computational craft.</p>
+          </div>
+          
+          <!-- Col 2 -->
+          <div class="footer-col footer-col-links">
+            <span class="footer-col-title">NAVIGATION</span>
+            <div class="footer-links-grid">
+              <div class="footer-links-col">
+                <a href="#home" class="footer-link hover-target">Home</a>
+                <a href="#about" class="footer-link hover-target">About</a>
+                <a href="#events" class="footer-link hover-target">Events</a>
+              </div>
+              <div class="footer-links-col">
+                <a href="#timeline" class="footer-link hover-target">Timeline</a>
+                <a href="#workshops" class="footer-link hover-target">Workshops</a>
+                <a href="#team" class="footer-link hover-target">Team</a>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Col 3 -->
+          <div class="footer-col footer-col-socials">
+            <span class="footer-col-title">SOCIAL MEDIA</span>
+            <div class="footer-socials-list">
+              <a href="#" class="footer-social-link hover-target">INSTAGRAM <span class="arrow">→</span></a>
+              <a href="#" class="footer-social-link hover-target">TWITTER <span class="arrow">→</span></a>
+              <a href="#" class="footer-social-link hover-target">LINKEDIN <span class="arrow">→</span></a>
+              <a href="#" class="footer-social-link hover-target">GITHUB <span class="arrow">→</span></a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="footer-bottom">
+          <span class="copyright">© 2026 TechFest. All rights reserved.</span>
+          <span class="credits">Designed with obsession.</span>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <!-- Registration Modal (Sleek Glassmorphic Overlay) -->
+  <div id="register-modal" class="register-modal">
+    <div class="modal-backdrop trigger-close-modal"></div>
+    <div class="modal-container glass-panel">
+      <button class="modal-close-btn trigger-close-modal hover-target">×</button>
+      <div class="modal-content">
+        <h3 class="modal-title">SECURE REGISTRATION</h3>
+        <p class="modal-desc">Enter your credentials to join TechFest 2026.</p>
+        
+        <form id="registration-form" class="registration-form">
+          <div class="form-group">
+            <label for="reg-name" class="form-label">FULL NAME</label>
+            <input type="text" id="reg-name" class="form-input hover-target" placeholder="Enter your full name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="reg-email" class="form-label">EMAIL ADDRESS</label>
+            <input type="email" id="reg-email" class="form-input hover-target" placeholder="you@domain.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-college" class="form-label">COLLEGE / INSTITUTION</label>
+            <input type="text" id="reg-college" class="form-input hover-target" placeholder="Enter your college name" required>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-event" class="form-label">PRIMARY INTEREST</label>
+            <select id="reg-event" class="form-input form-select hover-target" required>
+              <option value="" disabled selected>Select an option</option>
+              <option value="hackathon">Hackathon</option>
+              <option value="robotics">Robotics Challenge</option>
+              <option value="ai-ml">AI/ML Showdown</option>
+              <option value="cybersecurity">Cybersecurity CTF</option>
+              <option value="gaming">Gaming Tournament</option>
+              <option value="startup">Startup Pitch</option>
+              <option value="drone">Drone Racing</option>
+              <option value="web-dev">Web Development</option>
+              <option value="workshops">Workshops Only</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary modal-submit-btn hover-target">SUBMIT APPLICATION</button>
+        </form>
+
+        <div id="modal-success" class="modal-success-msg">
+          <div class="success-icon">✓</div>
+          <h4>APPLICATION RECEIVED</h4>
+          <p>Your ticket registration request has been queued. Check your inbox for details.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry Script -->
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
